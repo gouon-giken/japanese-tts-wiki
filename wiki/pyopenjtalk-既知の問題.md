@@ -1,0 +1,20 @@
+## 壊れている機能
+
+### 辞書のコスト
+openjtalkの辞書はunidic-csj(たぶん2.12.2)とnaist-jdicをマージして使われており、形態素解析、短単位解析能力が機能しなくなっている。
+
+特にマージ後に品詞情報と単語コストをちゃんと調整されていないので、mecab本来の機能の文脈によって違う品詞で判定する（文脈によって違う読みを与える）が壊れていて、どの文脈でも同じ読みが大体でる。
+
+pyopenjtalk-plusでは、それを解決するために入力文をsudachiとsudachi辞書を使ってもう一度形態素解析し、読みが違ったら上書きする処理がある。
+（sudachiではなく短単位辞書のunidicで同じような処理をした方がいいとは思うが、sudachiでも機能はする)
+
+下記リポジトリに辞書を漢字ngramで分割した物が置いてあるが、
+https://github.com/WariHima/pyopenjtalk-mod/tree/master/pyopenjtalk/user_dictionary
+kanji-gram-.csvの内容を見比べてみて、4行目の数字がコストで小さい順で出やすいのだが、unidicとnaist-jdicで数値の差が大きいことがわかる 特にunidicのよりnaist-jdicの方が出やすく、unidicはほとんど使われていないパターンのほうが多そう
+
+また、現状コストを手動調整する以外に方法はない。
+
+openjtalk 1.11でunidicの追加がされており、辞書のみそれ以前のバージョンに戻すことも可能 ただopenjtalk 1.11には辞書にフィラー項目が追加されており、それがないと未知語を正しく読めない。
+
+pyopenjtalk-plusではその問題を懸念してフィラー項目のみ別ファイルに避けている
+pyopenjtalk-modでは辞書ファイルをngramサイズで分けることで辞書のコスト設定の前準備をしている　
